@@ -188,7 +188,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
           <p className={styles.value}>{bids.length}</p>
         </div>
         <div className={styles.infoItem}>
-          <p className={styles.label}>Minimum Bid</p>
+          <p className={styles.label}>Minimum Next Bid</p>
           <p className={styles.value}>{formatCurrency(minNextBid / 100)}</p>
         </div>
       </div>

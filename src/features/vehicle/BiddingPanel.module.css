@@ -51,6 +51,8 @@
   background-color: #f9fafb;
   border-radius: 6px;
   border: 1px solid #e5e7eb;
+  overflow: hidden;
+  min-width: 0;
 }
 
 .label {
@@ -67,6 +69,7 @@
   font-size: 1.25rem;
   font-weight: 700;
   color: #1f2937;
+  word-break: break-word;
 }
 
 .userStatus {

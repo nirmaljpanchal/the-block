@@ -142,9 +142,12 @@ export function InventoryPage() {
   const [sortBy, setSortBy] = useState<'endingSoon' | 'priceAsc' | 'priceDesc' | 'mileageAsc'>(
     (searchParams.get('sort') as any) || 'endingSoon'
   );
+  const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
   const [countdownUpdate, setCountdownUpdate] = useState(0);
   const queryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const ITEMS_PER_PAGE = 12;
 
   const filters: VehicleFilters = {
     query: query.trim() || undefined,
@@ -174,20 +177,27 @@ export function InventoryPage() {
     if (selectedBodyStyle) params.set('bodyStyle', selectedBodyStyle);
     if (selectedStatus) params.set('status', selectedStatus);
     if (sortBy !== 'endingSoon') params.set('sort', sortBy);
+    if (currentPage > 1) params.set('page', currentPage.toString());
 
     setSearchParams(params);
-  }, [query, selectedMake, selectedBodyStyle, selectedStatus, sortBy, setSearchParams]);
+  }, [query, selectedMake, selectedBodyStyle, selectedStatus, sortBy, currentPage, setSearchParams]);
 
   useEffect(() => {
     if (queryTimeoutRef.current) clearTimeout(queryTimeoutRef.current);
     queryTimeoutRef.current = setTimeout(() => {
-      // Trigger query refetch via filter change
+      // Reset to page 1 when filters change
+      setCurrentPage(1);
     }, 250);
 
     return () => {
       if (queryTimeoutRef.current) clearTimeout(queryTimeoutRef.current);
     };
   }, [query]);
+
+  useEffect(() => {
+    // Reset to page 1 when other filters change
+    setCurrentPage(1);
+  }, [selectedMake, selectedBodyStyle, selectedStatus, sortBy]);
 
   useEffect(() => {
     countdownIntervalRef.current = setInterval(() => {
@@ -205,6 +215,7 @@ export function InventoryPage() {
     setSelectedBodyStyle('');
     setSelectedStatus('');
     setSortBy('endingSoon');
+    setCurrentPage(1);
   };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
@@ -260,6 +271,11 @@ export function InventoryPage() {
   }
 
   const hasActiveFilters = query || selectedMake || selectedBodyStyle || selectedStatus;
+
+  const totalPages = vehicles ? Math.ceil(vehicles.length / ITEMS_PER_PAGE) : 1;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedVehicles = vehicles ? vehicles.slice(startIndex, endIndex) : [];
 
   if (!vehicles || vehicles.length === 0) {
     return (
@@ -419,10 +435,36 @@ export function InventoryPage() {
       )}
 
       <div className={styles.grid}>
-        {vehicles.map((vehicle) => (
+        {paginatedVehicles.map((vehicle) => (
           <VehicleCard key={vehicle.id} vehicle={vehicle} countdownUpdateKey={countdownUpdate} />
         ))}
       </div>
+
+      {totalPages > 1 && (
+        <div className={styles.pagination}>
+          <button
+            onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+            disabled={currentPage === 1}
+            className={styles.paginationButton}
+            aria-label="Previous page"
+          >
+            ← Previous
+          </button>
+
+          <div className={styles.pageInfo}>
+            Page {currentPage} of {totalPages}
+          </div>
+
+          <button
+            onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+            disabled={currentPage === totalPages}
+            className={styles.paginationButton}
+            aria-label="Next page"
+          >
+            Next →
+          </button>
+        </div>
+      )}
     </div>
   );
 }
