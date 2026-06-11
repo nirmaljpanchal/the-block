@@ -151,15 +151,11 @@ class MockVehicleClient implements VehicleService {
 
     // Apply filters
     if (filters.query) {
-      const q = filters.query.toLowerCase();
-      result = result.filter(
-        (v) =>
-          v.year.toString().includes(q) ||
-          v.make.toLowerCase().includes(q) ||
-          v.model.toLowerCase().includes(q) ||
-          v.trim.toLowerCase().includes(q) ||
-          v.vin.toLowerCase().includes(q)
-      );
+      const terms = filters.query.toLowerCase().split(/\s+/);
+      result = result.filter((v) => {
+        const vehicleText = `${v.year} ${v.make} ${v.model} ${v.trim} ${v.vin}`.toLowerCase();
+        return terms.every((term) => vehicleText.includes(term));
+      });
     }
 
     if (filters.make) {

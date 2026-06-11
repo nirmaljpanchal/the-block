@@ -135,6 +135,7 @@ function SkeletonCard() {
 
 export function InventoryPage() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const [inputValue, setInputValue] = useState(searchParams.get('q') || '');
   const [query, setQuery] = useState(searchParams.get('q') || '');
   const [selectedMake, setSelectedMake] = useState(searchParams.get('make') || '');
   const [selectedBodyStyle, setSelectedBodyStyle] = useState(searchParams.get('bodyStyle') || '');
@@ -148,6 +149,7 @@ export function InventoryPage() {
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const ITEMS_PER_PAGE = 12;
+  const SEARCH_DEBOUNCE_MS = 800;
 
   const filters: VehicleFilters = {
     query: query.trim() || undefined,
@@ -185,14 +187,15 @@ export function InventoryPage() {
   useEffect(() => {
     if (queryTimeoutRef.current) clearTimeout(queryTimeoutRef.current);
     queryTimeoutRef.current = setTimeout(() => {
-      // Reset to page 1 when filters change
+      // Debounce search input and update actual query
+      setQuery(inputValue.trim());
       setCurrentPage(1);
-    }, 250);
+    }, SEARCH_DEBOUNCE_MS);
 
     return () => {
       if (queryTimeoutRef.current) clearTimeout(queryTimeoutRef.current);
     };
-  }, [query]);
+  }, [inputValue]);
 
   useEffect(() => {
     // Reset to page 1 when other filters change
@@ -210,6 +213,7 @@ export function InventoryPage() {
   }, []);
 
   const handleClearFilters = (): void => {
+    setInputValue('');
     setQuery('');
     setSelectedMake('');
     setSelectedBodyStyle('');
@@ -227,7 +231,7 @@ export function InventoryPage() {
 
     value = value.replace(/[\x00-\x1F\x7F]/g, '');
 
-    setQuery(value);
+    setInputValue(value);
   };
 
   if (isLoading) {
@@ -259,7 +263,7 @@ export function InventoryPage() {
           <input
             type="text"
             placeholder="Search vehicles..."
-            value={query}
+            value={inputValue}
             onChange={handleSearchChange}
             className={styles.searchInput}
             aria-label="Search vehicles"
@@ -284,7 +288,7 @@ export function InventoryPage() {
           <input
             type="text"
             placeholder="Search vehicles..."
-            value={query}
+            value={inputValue}
             onChange={handleSearchChange}
             className={styles.searchInput}
             aria-label="Search vehicles"
@@ -367,7 +371,7 @@ export function InventoryPage() {
         <input
           type="text"
           placeholder="Search vehicles by year, make, model, trim, or VIN..."
-          value={query}
+          value={inputValue}
           onChange={handleSearchChange}
           className={styles.searchInput}
           aria-label="Search vehicles"
