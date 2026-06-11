@@ -42,7 +42,7 @@
 
 .bidInfo {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 1rem;
 }
 
@@ -53,15 +53,20 @@
   border: 1px solid #e5e7eb;
   overflow: hidden;
   min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
 }
 
 .label {
-  margin: 0 0 0.25rem 0;
+  margin: 0;
   font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: #6b7280;
+  flex-shrink: 0;
 }
 
 .value {
@@ -70,6 +75,8 @@
   font-weight: 700;
   color: #1f2937;
   word-break: break-word;
+  text-align: right;
+  flex-shrink: 0;
 }
 
 .userStatus {
