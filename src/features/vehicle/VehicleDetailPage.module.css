@@ -1,0 +1,543 @@
+.container {
+  padding: 1rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.mainSection {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+}
+
+.notFoundContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 400px;
+  padding: 2rem;
+}
+
+.notFoundContent {
+  text-align: center;
+}
+
+.notFoundContent h2 {
+  margin-bottom: 1rem;
+  color: #1f2937;
+}
+
+.notFoundContent p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+.backLink {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: #2563eb;
+  color: #ffffff;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.2s;
+}
+
+.backLink:hover {
+  background-color: #1d4ed8;
+  text-decoration: none;
+}
+
+.gallery {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mainImageContainer {
+  position: relative;
+  width: 100%;
+  padding-bottom: 66.67%;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+  cursor: grab;
+}
+
+.mainImageContainer:active {
+  cursor: grabbing;
+}
+
+.mainImage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.photoCounter {
+  position: absolute;
+  bottom: 1rem;
+  right: 1rem;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.thumbnailStrip {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding: 0.5rem 0;
+}
+
+.thumbnail {
+  flex-shrink: 0;
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  background-color: #f3f4f6;
+  transition: border-color 0.2s, opacity 0.2s;
+  opacity: 0.7;
+  padding: 0;
+}
+
+.thumbnail:hover {
+  opacity: 1;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.activeThumbnail {
+  border-color: #2563eb;
+  opacity: 1;
+}
+
+.titleSection {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.titleSection h1 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.75rem;
+  line-height: 1.2;
+}
+
+.specsSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 2rem;
+}
+
+.specsSection h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.specsList {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.specItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.specItem dt {
+  font-weight: 600;
+  color: #6b7280;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.specItem dd {
+  color: #1f2937;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.damageSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 2rem;
+}
+
+.damageSection h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.noDamage {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.damageList {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.damageList li {
+  color: #1f2937;
+  padding-left: 1.5rem;
+  position: relative;
+}
+
+.damageList li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: #2563eb;
+  font-weight: bold;
+}
+
+.dealershipSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 2rem;
+}
+
+.dealershipSection h2 {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: #1f2937;
+}
+
+.dealershipInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.dealerName {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin: 0;
+}
+
+.dealerLocation {
+  color: #6b7280;
+  margin: 0;
+}
+
+.auctionPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background-color: #f9fafb;
+  height: fit-content;
+}
+
+.auctionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 1rem;
+  margin-bottom: 0;
+}
+
+.auctionHeader h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #1f2937;
+}
+
+.auctionStatus {
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.statusLive {
+  background-color: #fef2f2;
+  color: #991b1b;
+}
+
+.statusEnded {
+  background-color: #f3f4f6;
+  color: #6b7280;
+}
+
+.countdownSection {
+  text-align: center;
+}
+
+.countdown {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #2563eb;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 0.05em;
+}
+
+.bidInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 6px;
+}
+
+.bidInfoItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+}
+
+.bidInfoLabel {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+}
+
+.bidInfoValue {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0;
+}
+
+.bidForm {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 6px;
+}
+
+.bidInput {
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: inherit;
+  color: #1f2937;
+}
+
+.bidInput:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.bidInput:disabled {
+  background-color: #f3f4f6;
+  color: #9ca3af;
+}
+
+.bidButton {
+  width: 100%;
+}
+
+.bidError {
+  color: #991b1b;
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0 0;
+}
+
+.auctionEndedMessage {
+  padding: 1rem;
+  background-color: #f3f4f6;
+  color: #6b7280;
+  border-radius: 6px;
+  text-align: center;
+  font-weight: 500;
+}
+
+.bidsSection {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 1rem;
+}
+
+.bidsSection h3 {
+  font-size: 1rem;
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-weight: 600;
+}
+
+.bidsList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.noBids {
+  color: #6b7280;
+  font-size: 0.875rem;
+  margin: 0;
+  text-align: center;
+  padding: 1rem 0;
+}
+
+.bidItem {
+  padding: 0.75rem;
+  background-color: #ffffff;
+  border-radius: 4px;
+  border-left: 3px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.newBid {
+  border-left-color: #2563eb;
+  background-color: #eff6ff;
+  animation: highlightBid 1s ease-out;
+}
+
+@keyframes highlightBid {
+  0% {
+    background-color: #dbeafe;
+  }
+  100% {
+    background-color: #ffffff;
+  }
+}
+
+.bidItemContent {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.25rem;
+}
+
+.bidderName {
+  font-weight: 500;
+  color: #1f2937;
+  margin: 0;
+  font-size: 0.875rem;
+}
+
+.bidAmount {
+  font-weight: 700;
+  color: #2563eb;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.bidTime {
+  color: #9ca3af;
+  font-size: 0.75rem;
+  margin: 0;
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding: 2rem 1.5rem;
+  }
+
+  .content {
+    grid-template-columns: 1fr 380px;
+    gap: 2rem;
+  }
+
+  .auctionPanel {
+    position: sticky;
+    top: 100px;
+    max-height: calc(100vh - 120px);
+  }
+
+  .titleSection h1 {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 0.75rem;
+  }
+
+  .gallery {
+    gap: 0.5rem;
+  }
+
+  .thumbnailStrip {
+    gap: 0.5rem;
+  }
+
+  .thumbnail {
+    width: 60px;
+    height: 60px;
+  }
+
+  .titleSection h1 {
+    font-size: 1.25rem;
+  }
+
+  .specsSection,
+  .damageSection,
+  .dealershipSection {
+    padding-top: 1.5rem;
+  }
+
+  .specsSection h2,
+  .damageSection h2,
+  .dealershipSection h2 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+  }
+
+  .specsList {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+
+  .countdown {
+    font-size: 1.5rem;
+  }
+
+  .bidInfoItem {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
