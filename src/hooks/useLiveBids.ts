@@ -15,7 +15,13 @@ export function useLiveBids(vehicleId: string) {
         setBids(initialBids);
 
         unsubscribe = vehicleService.subscribeToBids(vehicleId, (newBid: Bid) => {
-          setBids((prev) => [...prev, newBid]);
+          setBids((prev) => {
+            const bidIds = new Set(prev.map((b) => b.id));
+            if (bidIds.has(newBid.id)) {
+              return prev;
+            }
+            return [...prev, newBid];
+          });
           setNewBidIds((prev) => new Set([...prev, newBid.id]));
 
           const timer = setTimeout(() => {
