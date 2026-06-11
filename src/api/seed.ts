@@ -27,9 +27,23 @@ function getProvinceState(province: string): string {
   return provinceMap[province] || province;
 }
 
-export const SEED_VEHICLES: Vehicle[] = rawVehicles.map((v: any) => {
-  const startTime = new Date(v.auction_start).getTime();
-  const endTime = new Date().getDate() + 2; // 48 hours after start
+const vehicles = rawVehicles.map((v: any, index: number) => {
+  const isEndedAuction = index < 5;
+  const isUpcomingAuction = index >= 5 && index < 8;
+
+  let startTime: number;
+  let endTime: number;
+
+  if (isEndedAuction) {
+    startTime = Date.now() - (10 * 24 * 60 * 60 * 1000); // Started 10 days ago
+    endTime = Date.now() - (Math.random() * 7 * 24 * 60 * 60 * 1000); // Ended 0-7 days ago
+  } else if (isUpcomingAuction) {
+    startTime = Date.now() + (1 * 24 * 60 * 60 * 1000) + (Math.random() * 12 * 60 * 60 * 1000); // Starts 1-2 days in future
+    endTime = startTime + (48 * 60 * 60 * 1000); // 48 hours duration
+  } else {
+    startTime = new Date(v.auction_start).getTime();// Started 0-2 hours ago
+    endTime = Date.now() + (48 * 60 * 60 * 1000); // Ends in 48 hours
+  }
 
   return {
     id: v.id,
@@ -61,4 +75,6 @@ export const SEED_VEHICLES: Vehicle[] = rawVehicles.map((v: any) => {
       status: 'upcoming',
     },
   };
-}) as Vehicle[];
+});
+
+export const SEED_VEHICLES: Vehicle[] = vehicles.sort(() => Math.random() - 0.5);
