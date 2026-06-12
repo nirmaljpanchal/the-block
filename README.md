@@ -319,7 +319,7 @@ data/
 - Structure: `{ [vehicleId]: Bid[] }` with validation; corrupted data is silently discarded
 - Why: Preserves bid history across page refreshes and browser restarts without a backend; enables testing and demo persistence; in production would delegate to server
 
-**5. Mobile-First CSS & Auto-Fill Grid**
+**4. Mobile-First CSS & Auto-Fill Grid**
 - Responsive grid uses `repeat(auto-fill, minmax(250px, 1fr))`; layouts start mobile and add media queries
 - Why: Ensures usability on all screen sizes; simpler than framework breakpoints
 
