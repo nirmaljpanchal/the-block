@@ -41,7 +41,7 @@ const vehicles = rawVehicles.map((v: any, index: number) => {
     startTime = Date.now() + (1 * 24 * 60 * 60 * 1000) + (Math.random() * 12 * 60 * 60 * 1000); // Starts 1-2 days in future
     endTime = startTime + (48 * 60 * 60 * 1000); // 48 hours duration
   } else {
-    startTime = new Date(v.auction_start).getTime();// Started 0-2 hours ago
+    startTime = new Date(v.auction_start).getTime();
     endTime = Date.now() + (48 * 60 * 60 * 1000); // Ends in 48 hours
   }
 
@@ -72,7 +72,7 @@ const vehicles = rawVehicles.map((v: any, index: number) => {
       endsAt: new Date(endTime).toISOString(),
       startingBidCents: Math.round(v.starting_bid * 100),
       minIncrementCents: Math.round((v.starting_bid * 0.05) * 100),
-      status: 'upcoming',
+      status: 'upcoming' as const,
     },
   };
 });

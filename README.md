@@ -49,21 +49,23 @@ A real-time vehicle auction bidding application built with React, TypeScript, an
    ```
    The app will open at `http://localhost:5173`
 
-4. **Build for production**
+4. **Type check**
    ```bash
-   npm run build
+   npx tsc
    ```
+   Runs TypeScript compiler to check for type errors (no build output).
 
-5. **Type check**
+5. **Build for production**
    ```bash
    npm run build
    ```
-   This runs TypeScript compiler to check for type errors.
+   TypeScript check + production build.
 
 ## Available Scripts
 
 - `npm run dev` — Start development server with hot reload
-- `npm run build` — TypeScript type check + production build
+- `npx tsc` — Type check only (no build output)
+- `npm run build` — Type check + production build
 - `npm run preview` — Preview production build locally
 - `npm run lint` — Run ESLint
 
@@ -230,7 +232,7 @@ data/
 - [ ] Bid history shows all bids without duplicates
 - [ ] Anti-snipe extends auction in final 60s
 - [ ] Responsive at 375px (mobile) and 1280px (desktop)
-- [ ] `npm run build` passes TypeScript check (zero errors)
+- [ ] `npx tsc` passes with zero errors
 
 ## Conventions & Rules
 
