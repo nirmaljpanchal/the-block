@@ -1,6 +1,6 @@
 import type { Vehicle } from '../types/index';
 
-const LOAD_TIME = new Date('2026-06-11T16:00:00Z').getTime();
+export const LOAD_TIME = Date.now();
 
 /**
  * Normalize seed vehicles so that at any load time:

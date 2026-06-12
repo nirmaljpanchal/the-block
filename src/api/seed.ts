@@ -1,4 +1,5 @@
 import type { Vehicle } from '../types/index';
+import { LOAD_TIME } from './normalize';
 import rawVehicles from '../../data/vehicles.json';
 
 function normalizeBodyStyle(style: string): 'sedan' | 'suv' | 'truck' | 'coupe' | 'van' {
@@ -35,14 +36,15 @@ const vehicles = rawVehicles.map((v: any, index: number) => {
   let endTime: number;
 
   if (isEndedAuction) {
-    startTime = Date.now() - (10 * 24 * 60 * 60 * 1000); // Started 10 days ago
-    endTime = Date.now() - (Math.random() * 7 * 24 * 60 * 60 * 1000); // Ended 0-7 days ago
+    startTime = LOAD_TIME - (10 * 24 * 60 * 60 * 1000); // Started 10 days ago
+    endTime = LOAD_TIME - (Math.random() * 7 * 24 * 60 * 60 * 1000); // Ended 0-7 days ago
   } else if (isUpcomingAuction) {
-    startTime = Date.now() + (1 * 24 * 60 * 60 * 1000) + (Math.random() * 12 * 60 * 60 * 1000); // Starts 1-2 days in future
+    startTime = LOAD_TIME + (1 * 24 * 60 * 60 * 1000) + (Math.random() * 12 * 60 * 60 * 1000); // Starts 1-2 days in future
     endTime = startTime + (48 * 60 * 60 * 1000); // 48 hours duration
   } else {
-    startTime = new Date(v.auction_start).getTime();
-    endTime = Date.now() + (48 * 60 * 60 * 1000); // Ends in 48 hours
+    // Live auctions: ensure they've already started and will end in 48 hours
+    startTime = LOAD_TIME - (Math.random() * 24 * 60 * 60 * 1000); // Started 0-24 hours ago
+    endTime = LOAD_TIME + (48 * 60 * 60 * 1000); // Ends in next 48 hours
   }
 
   return {
