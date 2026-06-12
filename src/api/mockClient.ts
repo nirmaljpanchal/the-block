@@ -351,6 +351,12 @@ class MockVehicleClient implements VehicleService {
       this.subscriberCallbacks.get(vehicleId)?.delete(cb);
     };
   }
+
+  // Reset bids for testing purposes
+  resetBids(): void {
+    this.bids.clear();
+    this.saveBidsToStorage();
+  }
 }
 
 export const mockVehicleClient = new MockVehicleClient();

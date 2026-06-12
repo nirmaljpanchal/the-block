@@ -4,7 +4,8 @@ import type { PlaceBidInput } from '../types/index';
 
 describe('mockVehicleClient.placeBid', () => {
   beforeEach(() => {
-    // Tests run with real timers; latency is 150-450ms which is acceptable for tests
+    // Reset bids before each test to prevent state leakage
+    (mockVehicleClient as any).resetBids();
   });
 
   it('accepts a valid bid on a live auction', async () => {
@@ -149,16 +150,27 @@ describe('mockVehicleClient.placeBid', () => {
     });
     expect(firstBid.ok).toBe(true);
 
+    // After first bid, current high is minNextBid, so next minimum should be minNextBid + minIncrement
+    const secondMinBid = minNextBid + vehicle.auction.minIncrement;
+
     // Try to place a bid below minimum increment (between current high and minimum next)
     const secondBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
       amount: minNextBid + Math.floor(vehicle.auction.minIncrement / 2),
     });
 
+    console.log('Second bid test:', {
+      currentHigh: minNextBid,
+      secondMinBid,
+      attemptedBid: minNextBid + Math.floor(vehicle.auction.minIncrement / 2),
+      secondBidResult: secondBid
+    });
+
     expect(secondBid.ok).toBe(false);
     if (!secondBid.ok) {
       expect(secondBid.code).toBe('BELOW_MINIMUM');
-      expect(secondBid.currentHighBid).toBe(vehicle.auction.startingBid);
+      expect(secondBid.currentHighBid).toBe(minNextBid); // Current high is the first bid amount
+      expect(secondBid.minimumNextBid).toBe(secondMinBid); // Minimum is current + increment
     }
   });
 
@@ -209,21 +221,21 @@ describe('mockVehicleClient.placeBid', () => {
     expect(first.ok).toBe(true);
 
     // Second bid with minimum increment above first
+    const secondAmount = minNextBid + vehicle.auction.minIncrement;
     const second = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: minNextBid + vehicle.auction.minIncrement,
+      amount: secondAmount,
     });
     expect(second.ok).toBe(true);
     if (second.ok) {
-      expect(second.newHighBid).toBe(
-        vehicle.auction.startingBid + vehicle.auction.minIncrement
-      );
+      expect(second.newHighBid).toBe(secondAmount);
     }
 
-    // Third bid with 2x increment
+    // Third bid with increment above second
+    const thirdAmount = secondAmount + vehicle.auction.minIncrement;
     const third = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid + vehicle.auction.minIncrement * 2,
+      amount: thirdAmount,
     });
     expect(third.ok).toBe(true);
   });
@@ -301,7 +313,8 @@ describe('mockVehicleClient.placeBid', () => {
 
     expect(second.ok).toBe(false);
     if (!second.ok && second.code === 'BELOW_MINIMUM') {
-      expect(second.currentHighBid).toBe(vehicle.auction.startingBid);
+      expect(second.currentHighBid).toBe(minNextBid); // Current high is the first bid amount
+      expect(second.minimumNextBid).toBe(minNextBid + vehicle.auction.minIncrement);
     }
   });
 });
