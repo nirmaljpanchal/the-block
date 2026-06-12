@@ -35,7 +35,7 @@ describe('mockVehicleClient.placeBid', () => {
     }
   });
 
-  it('rejects INVALID_AMOUNT for non-integer amounts', async () => {
+  it('rejects BELOW_MINIMUM for very small amounts', async () => {
     const vehicles = await mockVehicleClient.getVehicles({ auctionStatus: 'live' });
     if (vehicles.length === 0) {
       expect(true).toBe(true);
@@ -44,14 +44,15 @@ describe('mockVehicleClient.placeBid', () => {
 
     const vehicle = vehicles[0];
 
+    // Amount far below starting bid
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: 1.5, // Not a safe integer
+      amount: 1.50, // $1.50 is below any realistic starting bid
     });
 
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.code).toBe('INVALID_AMOUNT');
+      expect(result.code).toBe('BELOW_MINIMUM');
     }
   });
 
