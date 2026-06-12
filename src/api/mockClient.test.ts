@@ -19,9 +19,13 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+
+    // First bid must be at minimum next bid (starting bid + minimum increment)
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
+
     const input: PlaceBidInput = {
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     };
 
     const result = await mockVehicleClient.placeBid(input);
@@ -136,18 +140,19 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
 
-    // Place first bid at starting price
+    // Place first bid at minimum next bid
     const firstBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     });
     expect(firstBid.ok).toBe(true);
 
-    // Try to place a bid below minimum increment
+    // Try to place a bid below minimum increment (between current high and minimum next)
     const secondBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid + Math.floor(vehicle.auction.minIncrement / 2),
+      amount: minNextBid + Math.floor(vehicle.auction.minIncrement / 2),
     });
 
     expect(secondBid.ok).toBe(false);
@@ -165,15 +170,16 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
 
-    // Place initial bid
+    // Place initial bid at minimum next bid
     const initialBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     });
     expect(initialBid.ok).toBe(true);
 
-    // Try to place a bid 11x the starting bid
+    // Try to place a bid 11x the starting bid (fat finger)
     const fatFingerBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
       amount: vehicle.auction.startingBid * 11,
@@ -193,18 +199,19 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
 
-    // First bid at starting price
+    // First bid at minimum next bid
     const first = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     });
     expect(first.ok).toBe(true);
 
-    // Second bid with minimum increment
+    // Second bid with minimum increment above first
     const second = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid + vehicle.auction.minIncrement,
+      amount: minNextBid + vehicle.auction.minIncrement,
     });
     expect(second.ok).toBe(true);
     if (second.ok) {
@@ -229,10 +236,11 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
 
     const placeBidResult = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     });
     expect(placeBidResult.ok).toBe(true);
 
@@ -242,7 +250,7 @@ describe('mockVehicleClient.placeBid', () => {
     if (placeBidResult.ok) {
       const foundBid = bids.find((b) => b.id === placeBidResult.bid.id);
       expect(foundBid).toBeDefined();
-      expect(foundBid?.amount).toBe(vehicle.auction.startingBid);
+      expect(foundBid?.amount).toBe(minNextBid);
       expect(foundBid?.isUserBid).toBe(true);
     }
   });
@@ -255,10 +263,11 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
 
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     });
 
     expect(result.ok).toBe(true);
@@ -275,18 +284,19 @@ describe('mockVehicleClient.placeBid', () => {
     }
 
     const vehicle = vehicles[0];
+    const minNextBid = vehicle.auction.startingBid + vehicle.auction.minIncrement;
 
-    // Place first bid
+    // Place first bid at minimum next bid
     const first = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid,
+      amount: minNextBid,
     });
     expect(first.ok).toBe(true);
 
-    // Try to place insufficient second bid
+    // Try to place insufficient second bid (less than minimum increment above first)
     const second = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amount: vehicle.auction.startingBid + 100, // Less than minimum increment
+      amount: minNextBid + 100, // Less than minimum increment above first
     });
 
     expect(second.ok).toBe(false);
