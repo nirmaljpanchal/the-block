@@ -16,8 +16,8 @@ export interface VehicleService {
 export interface AuctionDetails {
   startsAt: string; // ISO 8601 string
   endsAt: string; // ISO 8601 string
-  startingBidCents: number;
-  minIncrementCents: number;
+  startingBid: number; // dollars
+  minIncrement: number; // dollars
   status: 'upcoming' | 'live' | 'ended';
 }
 
@@ -44,7 +44,7 @@ export interface Vehicle {
 export interface Bid {
   id: string;
   vehicleId: string;
-  amountCents: number;
+  amount: number; // dollars
   bidderName: string;
   placedAt: string; // ISO 8601 string
   isUserBid: boolean;
@@ -61,19 +61,19 @@ export interface VehicleFilters {
 
 export interface PlaceBidInput {
   vehicleId: string;
-  amountCents: number;
+  amount: number; // dollars
 }
 
 export type PlaceBidResult =
   | {
       ok: true;
       bid: Bid;
-      newHighBidCents: number;
+      newHighBid: number; // dollars
     }
   | {
       ok: false;
       code: 'AUCTION_ENDED' | 'AUCTION_NOT_STARTED' | 'BELOW_MINIMUM' | 'INVALID_AMOUNT' | 'NOT_FOUND';
       message: string;
-      currentHighBidCents?: number;
-      minimumNextBidCents?: number;
+      currentHighBid?: number; // dollars
+      minimumNextBid?: number; // dollars
     };

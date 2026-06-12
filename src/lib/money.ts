@@ -1,6 +1,6 @@
 /**
  * Strict money parsing: accept only digits with optional one "." and ≤2 decimals.
- * Returns integer cents, or null if invalid.
+ * Returns dollars (rounded to 2 decimal places), or null if invalid.
  */
 export function parseMoneyInput(input: string): number | null {
   // Reject empty
@@ -18,11 +18,11 @@ export function parseMoneyInput(input: string): number | null {
   // Reject > $10,000,000
   if (dollars > 10000000) return null;
 
-  // Convert to cents and round
-  const cents = Math.round(dollars * 100);
+  // Round to 2 decimal places (cents)
+  const rounded = Math.round(dollars * 100) / 100;
 
-  // Final safety check: must be a safe integer and positive
-  if (!Number.isSafeInteger(cents) || cents <= 0) return null;
+  // Final safety check: must be positive
+  if (rounded <= 0) return null;
 
-  return cents;
+  return rounded;
 }

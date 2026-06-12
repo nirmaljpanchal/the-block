@@ -52,10 +52,10 @@ function VehicleCard({ vehicle, countdownUpdateKey }: VehicleCardProps) {
     return 'error';
   };
 
-  const currentHighBidCents = 0;
-  const displayBidDollars = currentHighBidCents > 0
-    ? currentHighBidCents / 100
-    : vehicle.auction.startingBidCents / 100;
+  const currentHighBid = 0;
+  const displayBid = currentHighBid > 0
+    ? currentHighBid
+    : vehicle.auction.startingBid;
 
   return (
     <a href={`/vehicles/${vehicle.id}`} className={styles.vehicleCard}>
@@ -95,9 +95,9 @@ function VehicleCard({ vehicle, countdownUpdateKey }: VehicleCardProps) {
         </div>
 
         <div className={styles.bidSection}>
-          <div className={styles.bidAmount}>{formatCurrency(displayBidDollars)}</div>
+          <div className={styles.bidAmount}>{formatCurrency(displayBid)}</div>
           <span className={styles.bidLabel}>
-            {currentHighBidCents > 0 ? 'Current bid' : 'Starting bid'}
+            {currentHighBid > 0 ? 'Current bid' : 'Starting bid'}
           </span>
         </div>
 

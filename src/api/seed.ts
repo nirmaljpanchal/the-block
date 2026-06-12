@@ -70,8 +70,8 @@ const vehicles = rawVehicles.map((v: any, index: number) => {
     auction: {
       startsAt: new Date(startTime).toISOString(),
       endsAt: new Date(endTime).toISOString(),
-      startingBidCents: Math.round(v.starting_bid * 100),
-      minIncrementCents: Math.round((v.starting_bid * 0.05) * 100),
+      startingBid: Math.round(v.starting_bid * 100) / 100,
+      minIncrement: Math.round((v.starting_bid * 0.05) * 100) / 100,
       status: 'upcoming' as const,
     },
   };

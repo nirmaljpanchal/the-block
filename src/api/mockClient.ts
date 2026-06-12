@@ -41,7 +41,7 @@ class MockVehicleClient implements VehicleService {
                   b !== null &&
                   typeof b.id === 'string' &&
                   typeof b.vehicleId === 'string' &&
-                  typeof b.amountCents === 'number' &&
+                  typeof b.amount === 'number' &&
                   typeof b.bidderName === 'string' &&
                   typeof b.placedAt === 'string' &&
                   typeof b.isUserBid === 'boolean'
@@ -79,7 +79,7 @@ class MockVehicleClient implements VehicleService {
   private getHighestBid(vehicleId: string): number | null {
     const bids = this.bids.get(vehicleId) || [];
     if (bids.length === 0) return null;
-    return Math.max(...bids.map((b) => b.amountCents));
+    return Math.max(...bids.map((b) => b.amount));
   }
 
   private scheduleRivalBid(vehicleId: string): void {
@@ -111,13 +111,13 @@ class MockVehicleClient implements VehicleService {
         return;
       }
 
-      const highBid = this.getHighestBid(vehicleId) || vehicle.auction.startingBidCents;
-      const minNextBid = highBid + vehicle.auction.minIncrementCents;
-      const rivalAmount = minNextBid + Math.floor(Math.random() * (vehicle.auction.minIncrementCents * 3));
+      const highBid = this.getHighestBid(vehicleId) || vehicle.auction.startingBid;
+      const minNextBid = highBid + vehicle.auction.minIncrement;
+      const rivalAmount = minNextBid + (Math.random() * (vehicle.auction.minIncrement * 3));
 
       const rivalInput: PlaceBidInput = {
         vehicleId,
-        amountCents: rivalAmount,
+        amount: Math.round(rivalAmount * 100) / 100,
       };
 
       await this.placeBid(rivalInput, { isRivalBid: true });
@@ -182,14 +182,14 @@ class MockVehicleClient implements VehicleService {
       );
     } else if (filters.sort === 'priceAsc') {
       result.sort((a, b) => {
-        const aHigh = this.getHighestBid(a.id) || a.auction.startingBidCents;
-        const bHigh = this.getHighestBid(b.id) || b.auction.startingBidCents;
+        const aHigh = this.getHighestBid(a.id) || a.auction.startingBid;
+        const bHigh = this.getHighestBid(b.id) || b.auction.startingBid;
         return aHigh - bHigh;
       });
     } else if (filters.sort === 'priceDesc') {
       result.sort((a, b) => {
-        const aHigh = this.getHighestBid(a.id) || a.auction.startingBidCents;
-        const bHigh = this.getHighestBid(b.id) || b.auction.startingBidCents;
+        const aHigh = this.getHighestBid(a.id) || a.auction.startingBid;
+        const bHigh = this.getHighestBid(b.id) || b.auction.startingBid;
         return bHigh - aHigh;
       });
     } else if (filters.sort === 'mileageAsc') {
@@ -226,12 +226,12 @@ class MockVehicleClient implements VehicleService {
   async placeBid(input: PlaceBidInput, options?: { isRivalBid?: boolean }): Promise<PlaceBidResult> {
     await this.simulateLatency();
 
-    // Validation: a. Safe integer and positive
-    if (!Number.isSafeInteger(input.amountCents) || input.amountCents <= 0) {
+    // Validation: a. Positive and valid dollar amount
+    if (input.amount <= 0) {
       return {
         ok: false,
         code: 'INVALID_AMOUNT',
-        message: 'Bid amount must be a positive integer',
+        message: 'Bid amount must be a positive amount',
       };
     }
 
@@ -267,21 +267,21 @@ class MockVehicleClient implements VehicleService {
     }
 
     // Validation: d. Minimum increment
-    const currentHigh = this.getHighestBid(input.vehicleId) || vehicle.auction.startingBidCents;
-    const minNextBid = currentHigh + vehicle.auction.minIncrementCents;
+    const currentHigh = this.getHighestBid(input.vehicleId) || vehicle.auction.startingBid;
+    const minNextBid = currentHigh + vehicle.auction.minIncrement;
 
-    if (input.amountCents < minNextBid) {
+    if (input.amount < minNextBid) {
       return {
         ok: false,
         code: 'BELOW_MINIMUM',
-        message: `You've been outbid. Current high is ${currentHigh / 100}. Minimum next bid is ${minNextBid / 100}.`,
-        currentHighBidCents: currentHigh,
-        minimumNextBidCents: minNextBid,
+        message: `You've been outbid. Current high is ${currentHigh}. Minimum next bid is ${minNextBid}.`,
+        currentHighBid: currentHigh,
+        minimumNextBid: minNextBid,
       };
     }
 
     // Validation: e. Fat-finger guard (reject if 10x current high, only if bids exist)
-    if (currentHigh > 0 && input.amountCents > currentHigh * 10) {
+    if (currentHigh > 0 && input.amount > currentHigh * 10) {
       return {
         ok: false,
         code: 'INVALID_AMOUNT',
@@ -301,7 +301,7 @@ class MockVehicleClient implements VehicleService {
     const newBid: Bid = {
       id: Math.random().toString(36).slice(2),
       vehicleId: input.vehicleId,
-      amountCents: input.amountCents,
+      amount: input.amount,
       bidderName: options?.isRivalBid ? this.getRandomRivalName() : 'You',
       placedAt: new Date().toISOString(),
       isUserBid: !options?.isRivalBid,
@@ -322,7 +322,7 @@ class MockVehicleClient implements VehicleService {
     return {
       ok: true,
       bid: newBid,
-      newHighBidCents: input.amountCents,
+      newHighBid: input.amount,
     };
   }
 

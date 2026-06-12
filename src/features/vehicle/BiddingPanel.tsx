@@ -27,8 +27,8 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
   const endsAtMs = new Date(vehicle.auction.endsAt).getTime();
   const auctionEnded = now >= endsAtMs;
 
-  const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => b.amountCents)) : vehicle.auction.startingBidCents;
-  const minNextBid = getMinimumNextBid(highestBid, vehicle.auction.minIncrementCents);
+  const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => b.amount)) : vehicle.auction.startingBid;
+  const minNextBid = getMinimumNextBid(highestBid, vehicle.auction.minIncrement);
 
   // Determine user's bid status
   useEffect(() => {
@@ -38,7 +38,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
       return;
     }
 
-    const userHighestBid = Math.max(...userBids.map((b) => b.amountCents));
+    const userHighestBid = Math.max(...userBids.map((b) => b.amount));
     if (userHighestBid === highestBid) {
       setUserBidStatus('high-bidder');
     } else {
@@ -56,8 +56,8 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
       return;
     }
 
-    const cents = parseMoneyInput(value);
-    if (cents === null) {
+    const amount = parseMoneyInput(value);
+    if (amount === null) {
       setValidationError('Invalid amount (digits and up to 2 decimals)');
       return;
     }
@@ -67,8 +67,8 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
       return;
     }
 
-    if (cents < minNextBid) {
-      setValidationError(`Minimum next bid is ${formatCurrency(minNextBid / 100)}`);
+    if (amount < minNextBid) {
+      setValidationError(`Minimum next bid is ${formatCurrency(minNextBid)}`);
       return;
     }
 
@@ -92,15 +92,15 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
     if (auctionEnded) return;
 
     setBidError('');
-    const cents = parseMoneyInput(bidInput);
+    const amount = parseMoneyInput(bidInput);
 
-    if (cents === null) {
+    if (amount === null) {
       setValidationError('Invalid bid amount');
       return;
     }
 
-    if (cents < minNextBid) {
-      setValidationError(`Minimum next bid is ${formatCurrency(minNextBid / 100)}`);
+    if (amount < minNextBid) {
+      setValidationError(`Minimum next bid is ${formatCurrency(minNextBid)}`);
       return;
     }
 
@@ -108,7 +108,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
 
     const result = await vehicleService.placeBid({
       vehicleId: vehicle.id,
-      amountCents: cents
+      amount: amount
     });
 
     setBidLoading(false);
@@ -117,15 +117,15 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
     if (!result.ok) {
       if (result.code === 'BELOW_MINIMUM') {
         // Race condition: outbid between render and submit — smooth recovery
-        const currentHigh = result.currentHighBidCents || highestBid;
-        const newMinNextBid = result.minimumNextBidCents || (currentHigh + vehicle.auction.minIncrementCents);
-        setBidError(`You've been outbid — current high is ${formatCurrency(currentHigh / 100)}. Minimum next bid is ${formatCurrency(newMinNextBid / 100)}.`);
+        const currentHigh = result.currentHighBid || highestBid;
+        const newMinNextBid = result.minimumNextBid || (currentHigh + vehicle.auction.minIncrement);
+        setBidError(`You've been outbid — current high is ${formatCurrency(currentHigh)}. Minimum next bid is ${formatCurrency(newMinNextBid)}.`);
         // Prefill with new minimum
-        setBidInput((newMinNextBid / 100).toFixed(2));
+        setBidInput(newMinNextBid.toFixed(2));
         setValidationError('');
         // Announce to screen readers
         if (liveRegionRef.current) {
-          liveRegionRef.current.textContent = `You've been outbid. Current high is ${formatCurrency(currentHigh / 100)}. Minimum next bid is ${formatCurrency(newMinNextBid / 100)}.`;
+          liveRegionRef.current.textContent = `You've been outbid. Current high is ${formatCurrency(currentHigh)}. Minimum next bid is ${formatCurrency(newMinNextBid)}.`;
         }
       } else if (result.code === 'AUCTION_ENDED') {
         setBidError('Auction has ended. No more bids accepted.');
@@ -144,8 +144,8 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
   };
 
   const handleQuickBid = (delta: number) => {
-    const newAmount = minNextBid + (delta * vehicle.auction.minIncrementCents);
-    setBidInput((newAmount / 100).toFixed(2));
+    const newAmount = minNextBid + (delta * vehicle.auction.minIncrement);
+    setBidInput(newAmount.toFixed(2));
     setValidationError('');
   };
 
@@ -181,7 +181,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
       <div className={styles.bidInfo}>
         <div className={styles.infoItem}>
           <p className={styles.label}>Current High Bid</p>
-          <p className={styles.value}>{formatCurrency(highestBid / 100)}</p>
+          <p className={styles.value}>{formatCurrency(highestBid)}</p>
         </div>
         <div className={styles.infoItem}>
           <p className={styles.label}>Total Bids</p>
@@ -189,7 +189,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
         </div>
         <div className={styles.infoItem}>
           <p className={styles.label}>Minimum Next Bid</p>
-          <p className={styles.value}>{formatCurrency(minNextBid / 100)}</p>
+          <p className={styles.value}>{formatCurrency(minNextBid)}</p>
         </div>
       </div>
 
@@ -234,7 +234,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
               className={styles.quickBidButton}
               variant="secondary"
             >
-              +1 ({formatCurrency((vehicle.auction.minIncrementCents / 100))})
+              +1 ({formatCurrency(vehicle.auction.minIncrement)})
             </Button>
             <Button
               type="button"
@@ -243,7 +243,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
               className={styles.quickBidButton}
               variant="secondary"
             >
-              +2 ({formatCurrency((vehicle.auction.minIncrementCents * 2 / 100))})
+              +2 ({formatCurrency(vehicle.auction.minIncrement * 2)})
             </Button>
             <Button
               type="button"
@@ -252,7 +252,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
               className={styles.quickBidButton}
               variant="secondary"
             >
-              +5 ({formatCurrency((vehicle.auction.minIncrementCents * 5 / 100))})
+              +5 ({formatCurrency(vehicle.auction.minIncrement * 5)})
             </Button>
           </div>
 
@@ -292,7 +292,7 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
                       {bid.bidderName}
                       {bid.isUserBid && ' (You)'}
                     </p>
-                    <p className={styles.bidAmount}>{formatCurrency(bid.amountCents / 100)}</p>
+                    <p className={styles.bidAmount}>{formatCurrency(bid.amount)}</p>
                   </div>
                   <p className={styles.bidTime}>{formatRelativeTime(bid.placedAt)}</p>
                 </div>

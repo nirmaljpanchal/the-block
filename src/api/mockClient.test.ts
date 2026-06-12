@@ -21,7 +21,7 @@ describe('mockVehicleClient.placeBid', () => {
     const vehicle = vehicles[0];
     const input: PlaceBidInput = {
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     };
 
     const result = await mockVehicleClient.placeBid(input);
@@ -29,9 +29,9 @@ describe('mockVehicleClient.placeBid', () => {
     expect(result.ok).toBe(true);
     if (result.ok) {
       expect(result.bid.vehicleId).toBe(vehicle.id);
-      expect(result.bid.amountCents).toBe(input.amountCents);
+      expect(result.bid.amount).toBe(input.amount);
       expect(result.bid.isUserBid).toBe(true);
-      expect(result.newHighBidCents).toBe(input.amountCents);
+      expect(result.newHighBid).toBe(input.amount);
     }
   });
 
@@ -46,7 +46,7 @@ describe('mockVehicleClient.placeBid', () => {
 
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: 1.5, // Not a safe integer
+      amount: 1.5, // Not a safe integer
     });
 
     expect(result.ok).toBe(false);
@@ -66,7 +66,7 @@ describe('mockVehicleClient.placeBid', () => {
 
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: -100,
+      amount: -100,
     });
 
     expect(result.ok).toBe(false);
@@ -78,7 +78,7 @@ describe('mockVehicleClient.placeBid', () => {
   it('rejects NOT_FOUND for non-existent vehicle', async () => {
     const result = await mockVehicleClient.placeBid({
       vehicleId: 'nonexistent',
-      amountCents: 1000000,
+      amount: 1000000,
     });
 
     expect(result.ok).toBe(false);
@@ -98,7 +98,7 @@ describe('mockVehicleClient.placeBid', () => {
     const vehicle = vehicles[0];
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
 
     expect(result.ok).toBe(false);
@@ -118,7 +118,7 @@ describe('mockVehicleClient.placeBid', () => {
     const vehicle = vehicles[0];
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
 
     expect(result.ok).toBe(false);
@@ -139,20 +139,20 @@ describe('mockVehicleClient.placeBid', () => {
     // Place first bid at starting price
     const firstBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
     expect(firstBid.ok).toBe(true);
 
     // Try to place a bid below minimum increment
     const secondBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents + Math.floor(vehicle.auction.minIncrementCents / 2),
+      amount: vehicle.auction.startingBid + Math.floor(vehicle.auction.minIncrement / 2),
     });
 
     expect(secondBid.ok).toBe(false);
     if (!secondBid.ok) {
       expect(secondBid.code).toBe('BELOW_MINIMUM');
-      expect(secondBid.currentHighBidCents).toBe(vehicle.auction.startingBidCents);
+      expect(secondBid.currentHighBid).toBe(vehicle.auction.startingBid);
     }
   });
 
@@ -168,14 +168,14 @@ describe('mockVehicleClient.placeBid', () => {
     // Place initial bid
     const initialBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
     expect(initialBid.ok).toBe(true);
 
     // Try to place a bid 11x the starting bid
     const fatFingerBid = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents * 11,
+      amount: vehicle.auction.startingBid * 11,
     });
 
     expect(fatFingerBid.ok).toBe(false);
@@ -196,26 +196,26 @@ describe('mockVehicleClient.placeBid', () => {
     // First bid at starting price
     const first = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
     expect(first.ok).toBe(true);
 
     // Second bid with minimum increment
     const second = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents + vehicle.auction.minIncrementCents,
+      amount: vehicle.auction.startingBid + vehicle.auction.minIncrement,
     });
     expect(second.ok).toBe(true);
     if (second.ok) {
-      expect(second.newHighBidCents).toBe(
-        vehicle.auction.startingBidCents + vehicle.auction.minIncrementCents
+      expect(second.newHighBid).toBe(
+        vehicle.auction.startingBid + vehicle.auction.minIncrement
       );
     }
 
     // Third bid with 2x increment
     const third = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents + vehicle.auction.minIncrementCents * 2,
+      amount: vehicle.auction.startingBid + vehicle.auction.minIncrement * 2,
     });
     expect(third.ok).toBe(true);
   });
@@ -231,7 +231,7 @@ describe('mockVehicleClient.placeBid', () => {
 
     const placeBidResult = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
     expect(placeBidResult.ok).toBe(true);
 
@@ -241,7 +241,7 @@ describe('mockVehicleClient.placeBid', () => {
     if (placeBidResult.ok) {
       const foundBid = bids.find((b) => b.id === placeBidResult.bid.id);
       expect(foundBid).toBeDefined();
-      expect(foundBid?.amountCents).toBe(vehicle.auction.startingBidCents);
+      expect(foundBid?.amount).toBe(vehicle.auction.startingBid);
       expect(foundBid?.isUserBid).toBe(true);
     }
   });
@@ -257,7 +257,7 @@ describe('mockVehicleClient.placeBid', () => {
 
     const result = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
 
     expect(result.ok).toBe(true);
@@ -266,7 +266,7 @@ describe('mockVehicleClient.placeBid', () => {
     }
   });
 
-  it('includes currentHighBidCents in BELOW_MINIMUM response', async () => {
+  it('includes currentHighBid in BELOW_MINIMUM response', async () => {
     const vehicles = await mockVehicleClient.getVehicles({ auctionStatus: 'live' });
     if (vehicles.length === 0) {
       expect(true).toBe(true);
@@ -278,19 +278,19 @@ describe('mockVehicleClient.placeBid', () => {
     // Place first bid
     const first = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents,
+      amount: vehicle.auction.startingBid,
     });
     expect(first.ok).toBe(true);
 
     // Try to place insufficient second bid
     const second = await mockVehicleClient.placeBid({
       vehicleId: vehicle.id,
-      amountCents: vehicle.auction.startingBidCents + 100, // Less than minimum increment
+      amount: vehicle.auction.startingBid + 100, // Less than minimum increment
     });
 
     expect(second.ok).toBe(false);
     if (!second.ok && second.code === 'BELOW_MINIMUM') {
-      expect(second.currentHighBidCents).toBe(vehicle.auction.startingBidCents);
+      expect(second.currentHighBid).toBe(vehicle.auction.startingBid);
     }
   });
 });
