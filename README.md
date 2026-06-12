@@ -217,6 +217,39 @@ data/
 - **No UI Libraries** — Plain CSS Modules (no Tailwind/Material-UI)
 - **Responsive Grid** — `repeat(auto-fill, minmax(250px, 1fr))`
 
+## Testing
+
+**Type Safety & Build Validation**
+- `npx tsc` — TypeScript strict mode validation (no `any` types, full coverage)
+- `npm run build` — Full production build with type checking; zero errors required
+
+**Manual Browser Testing**
+- Development server: `npm run dev` (Vite HMR for fast iteration)
+- Routes tested: "/" (inventory), "/vehicles/:id" (detail with bidding)
+- Real-time bid updates: Refresh page → bids persist (localStorage verification)
+- Race conditions: Placed bid → outbid before submit → error message pre-fills form
+
+**Responsive Layout Testing**
+- Mobile (375px viewport): Single column grid, stacked panels, readable text
+- Desktop (1280px viewport): Multi-column grid, sidebar bidding panel, full gallery
+- Device testing: Chrome DevTools responsive mode at both breakpoints
+- Auction countdown, bid history, and form inputs verified at both sizes
+
+**Functional Areas Tested**
+1. **Search & Filters** — Multi-word search ("honda civic"), make filter, body style filter, auction status (live/upcoming/ended), combined filters
+2. **Pagination** — 12 items per page, navigation between pages, correct vehicle count
+3. **Bidding** — Place bid → update high bid, quick-bid buttons (+1/+2/+5), form validation, minimum bid enforcement
+4. **Anti-Snipe** — Bid in final 60s → auction extends by 60s (verified in countdown)
+5. **Bid History** — New bids appear without duplicates, relative time updates every 1s, "You" label on user bids, scrollable list of 10+
+6. **Gallery** — Thumbnail navigation, arrow key navigation, main image updates
+7. **Live Data** — Rival bids arrive randomly; countdown timer updates; sorting by "ending soon" reflects live auction times
+
+**Limitations**
+- No automated unit tests (Jest/React Testing Library) — manual verification only
+- No e2e tests (Cypress/Playwright) — single browser session tested
+- No performance profiling (Lighthouse) — visual inspection only
+- No accessibility audit beyond keyboard nav and aria-live verification
+
 ## Testing Checklist
 
 - [ ] `npm run dev` starts without errors
@@ -233,6 +266,85 @@ data/
 - [ ] Anti-snipe extends auction in final 60s
 - [ ] Responsive at 375px (mobile) and 1280px (desktop)
 - [ ] `npx tsc` passes with zero errors
+
+## Time Spent
+
+**~ Around 4 hours total** across 3 sessions:
+
+1. **Project Setup** (Session 1) — Initialized Vite + React + TypeScript, configured strict tsconfig, set up folder structure, created base UI components (Button, Badge, Spinner), established routing (inventory and detail pages), and verified build/dev server.
+
+2. **Bidding Experience** (Session 2) — Implemented form validation with strict money parsing (regex-only, no parseFloat), quick-bid buttons (+1/+2/+5), race condition handling (outbid detection + pre-fill), bid history with relative time updates, anti-snipe protection (60s extension), and accessibility (aria-live announcements).
+
+3. **Search, Filters, & Listing UI** (Session 3) — Built multi-word search (debounced), auction status filtering (live/upcoming/ended), make/body style filters, pagination (12 items/page), responsive vehicle card grid, image gallery with thumbnail nav, and comprehensive test coverage.
+
+**Approach:** Focused on completing one feature end-to-end per session. Started with project foundations and incremental verification (build → dev server → routes). Leveraged React Query for server state and built custom hooks for real-time behavior (useLiveBids). Prioritized strict type safety and mobile-first responsive design.
+
+## Assumptions and Scope
+
+**Included:**
+- Live, upcoming, and ended auction statuses with realistic seed data distribution
+- Real-time bid updates via custom hook (WebSocket simulation in mock client)
+- Full vehicle filtering (make, body style, auction status), search, and sorting
+- Responsive layouts tested at 375px (mobile) and 1280px (desktop)
+- Type safety throughout (strict TypeScript, no `any` types)
+- Accessibility basics (aria-live, aria-describedby, keyboard navigation)
+
+**Skipped:**
+- Backend API (mock client with seed data only)
+- User authentication or multi-user accounts
+- Payment processing or real transaction handling
+- WebSocket real-time sync (simulated in mock client)
+- Email notifications or push alerts
+- Analytics or event tracking
+- Internationalization (CAD/en-CA hardcoded)
+
+**Simplified:**
+- Bid history capped at 10 display items (show all button available)
+- Dealership contact via address only (no phone/email links)
+- Vehicle condition based on single grade field (not detailed report card)
+- Damage notes as plain text (not clickable regions or photo links)
+
+## Notable Decisions
+
+**1. React Query Over useState**
+- Server state (vehicles, bids) managed by React Query; UI state (filters, form inputs) managed locally
+- Why: Avoids prop drilling, enables deduplication of concurrent requests, and decouples UI updates from server sync
+
+**2. Relative Time (Not Absolute Timestamps)**
+- Bid history and countdown timers show "5m ago" and "2d 5h remaining" (refreshed every 1s)
+- Why: Better UX; no need to tell users to refresh; mimics real auction sites
+
+**3. Bid Persistence with loadBids / saveBids**
+- Bids are persisted to localStorage (`'bids:v1'`) on app load and after each bid placement
+- Structure: `{ [vehicleId]: Bid[] }` with validation; corrupted data is silently discarded
+- Why: Preserves bid history across page refreshes and browser restarts without a backend; enables testing and demo persistence; in production would delegate to server
+
+**5. Mobile-First CSS & Auto-Fill Grid**
+- Responsive grid uses `repeat(auto-fill, minmax(250px, 1fr))`; layouts start mobile and add media queries
+- Why: Ensures usability on all screen sizes; simpler than framework breakpoints
+
+## What I'd Do With More Time
+
+**High Priority:**
+- **Persistent Bidder Identity** — Store bidder name in localStorage; pass to mock client to track "your" bids
+- **Vehicle Comparison** — Add bidding history chart showing bid escalation over time
+- **Advanced Filters** — Price range, mileage range, transmission type, transmission filters
+- **Keyboard Shortcuts** — Quick-bid buttons triggered by number keys (1, 2, 5)
+- **Unit Tests** — Jest + React Testing Library for components and utility functions (money parsing, formatters)
+
+**Medium Priority:**
+- **Image Optimization** — Lazy load thumbnails; next-gen formats (webp); CDN paths
+- **Undo Bid** — Allow retraction within 10 seconds (if rules permit)
+- **Bidding Notifications** — Toast alerts for outbid, successful bid, auction extended
+- **Auction Countdown Color** — Red when <5m remaining
+- **Performance Monitoring** — LCP, FID, CLS tracking to catch regressions
+
+**Nice-to-Have:**
+- **Dark Mode Toggle** — CSS variables already support it
+- **Export Bid History** — CSV or PDF download
+- **Real Websocket Sync** — Replace mock client with actual backend
+- **Email Notifications** — Integration with backend for outbid/won alerts
+- **Bidder Reputation** — Display bid count or auction history per bidder
 
 ## Conventions & Rules
 
