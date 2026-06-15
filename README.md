@@ -304,6 +304,62 @@ data/
 - Vehicle condition based on single grade field (not detailed report card)
 - Damage notes as plain text (not clickable regions or photo links)
 
+## Architecture Options
+
+Three architectural patterns were considered:
+
+### Option A: Frontend-Only with Abstracted Mock Data Layer (Selected ✓)
+
+Everything runs in the browser. Vehicle inventory comes from static JSON bundled with the app. Bids are held in client state, persisted to localStorage so refreshes don't wipe them. The key: hide the data source behind a `VehicleService` interface.
+
+**Advantages:**
+- Maximum feature velocity — all hours go into UX, search, the bid flow
+- Zero deployment complexity — single `npm run dev`
+- Trivially easy local setup — `npm i && npm run dev`
+- Can simulate competing bidders with `setInterval` for a more realistic live-auction feel
+- Same React Query pattern scales to a real API later
+
+**Trade-offs:**
+- No real concurrency — two users can't outbid each other
+- No server-side validation (mock client is authoritative for demo purposes)
+- Bidding state is per-browser, not shared across sessions
+- Works for prototypes and demos; not production-grade
+
+### Option B: Frontend + Lightweight Mock Backend
+
+Same React app, but bids POST to a local server (json-server or Mock Service Worker).
+
+**Advantages:**
+- Real HTTP request/response boundary with genuine latency
+- Network error paths are testable (timeouts, 500s, etc.)
+- Mock Service Worker (MSW) handlers work for both browser and tests
+- Closer to production architecture
+
+**Trade-offs:**
+- Two processes to run (frontend + server) or MSW registration overhead
+- Slightly more complex README setup steps
+- Still no real multi-user concurrency without WebSockets
+- Extra setup cost for modest realism gain
+
+### Option C: Full-Stack with Realtime Bidding
+
+Server-authoritative bid state with WebSockets (Node/Express or Supabase) and Postgres.
+
+**Advantages:**
+- True multi-user bidding — all browsers see updates instantly
+- Production-grade architecture — proper validation, persistence, auth
+- Can showcase realtime engineering skills
+
+**Trade-offs:**
+- 2+ hours on plumbing (server, CORS, deployment, DB seeding)
+- Complex README with account setup steps (Supabase, etc.)
+- Deployment overhead — not "runs locally on laptop"
+- Overkill for a prototype in this time box
+
+### Why Option A
+
+Selected **Option A** because it maximizes the feature surface area you can deliver in a fixed time box. The abstracted service layer (`VehicleService` interface) is the "senior move" — it looks and feels like a real API boundary, but all hours go into making the UX smooth: search, filters, responsive design, bid history, anti-snipe logic. If you later need a backend, the service interface is already there; you just swap the implementation. For a prototype and learning project, this is the right call.
+
 ## Notable Decisions
 
 **1. React Query Over useState**
