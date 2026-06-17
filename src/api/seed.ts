@@ -1,4 +1,4 @@
-import type { Vehicle } from '../types/index';
+import type { Vehicle, RawVehicle } from '../types/index';
 import { LOAD_TIME } from './normalize';
 import rawVehicles from '../../data/vehicles.json';
 
@@ -28,7 +28,7 @@ function getProvinceState(province: string): string {
   return provinceMap[province] || province;
 }
 
-const vehicles = rawVehicles.map((v: any, index: number) => {
+const vehicles = (rawVehicles as RawVehicle[]).map((v, index) => {
   const isEndedAuction = index < 5;
   const isUpcomingAuction = index >= 5 && index < 8;
 

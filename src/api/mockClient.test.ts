@@ -5,7 +5,8 @@ import type { PlaceBidInput } from '../types/index';
 describe('mockVehicleClient.placeBid', () => {
   beforeEach(() => {
     // Reset bids before each test to prevent state leakage
-    (mockVehicleClient as any).resetBids();
+    const client = mockVehicleClient as { resetBids: () => void };
+    client.resetBids();
   });
 
   it('accepts a valid bid on a live auction', async () => {

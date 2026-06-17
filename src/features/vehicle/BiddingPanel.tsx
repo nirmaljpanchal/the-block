@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useMemo } from 'react';
 import { vehicleService } from '../../api/client';
 import { Button } from '../../components/Button';
 import { formatCurrency } from '../../lib/formatters';
@@ -20,7 +20,6 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
   const [bidLoading, setBidLoading] = useState(false);
   const [bidError, setBidError] = useState('');
   const [showAllBids, setShowAllBids] = useState(false);
-  const [userBidStatus, setUserBidStatus] = useState<'high-bidder' | 'outbid' | null>(null);
   const enterKeyDebounceRef = useRef<NodeJS.Timeout | null>(null);
   const liveRegionRef = useRef<HTMLDivElement>(null);
 
@@ -30,21 +29,19 @@ export function BiddingPanel({ vehicle, bids, now, onBidPlaced }: BiddingPanelPr
   const highestBid = bids.length > 0 ? Math.max(...bids.map((b) => b.amount)) : vehicle.auction.startingBid;
   const minNextBid = getMinimumNextBid(highestBid, vehicle.auction.minIncrement);
 
-  // Determine user's bid status
-  useEffect(() => {
+  const userBidStatus = useMemo(() => {
     const userBids = bids.filter((b) => b.isUserBid);
     if (userBids.length === 0) {
-      setUserBidStatus(null);
-      return;
+      return null;
     }
 
     const userHighestBid = Math.max(...userBids.map((b) => b.amount));
     if (userHighestBid === highestBid) {
-      setUserBidStatus('high-bidder');
+      return 'high-bidder';
     } else {
-      setUserBidStatus('outbid');
+      return 'outbid';
     }
-  }, [bids, highestBid]);
+  }, [bids, highestBid]) as 'high-bidder' | 'outbid' | null;
 
   // Validate input on change (UX only, not authoritative)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

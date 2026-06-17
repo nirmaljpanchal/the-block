@@ -1,3 +1,25 @@
+export interface RawVehicle {
+  id: string;
+  vin: string;
+  year: number;
+  make: string;
+  model: string;
+  trim: string;
+  odometer_km: number;
+  exterior_color: string;
+  body_style: string;
+  transmission: string;
+  drivetrain: string;
+  fuel_type: string;
+  condition_grade: number;
+  damage_notes?: string[];
+  images?: string[];
+  selling_dealership: string;
+  city: string;
+  province: string;
+  starting_bid: number;
+}
+
 export interface Dealership {
   id: string;
   name: string;

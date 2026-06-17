@@ -24,10 +24,12 @@ export function VehicleDetailPage() {
 
   const [currentPhotoIndex, setCurrentPhotoIndex] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const mainImageRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNow(Date.now());
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);

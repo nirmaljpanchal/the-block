@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { vehicleService } from '../../api/client';
@@ -12,38 +12,35 @@ import styles from './InventoryPage.module.css';
 
 interface VehicleCardProps {
   vehicle: Vehicle;
-  countdownUpdateKey: number;
+  now: number;
 }
 
-function VehicleCard({ vehicle, countdownUpdateKey }: VehicleCardProps) {
-  const [timeRemaining, setTimeRemaining] = useState<string>('');
-
-  useEffect(() => {
+function VehicleCard({ vehicle, now }: VehicleCardProps) {
+  const timeRemaining = useMemo(() => {
     if (vehicle.auction.status === 'live') {
       const endsAtMs = new Date(vehicle.auction.endsAt).getTime();
-      setTimeRemaining(getTimeRemaining(endsAtMs));
+      return getTimeRemaining(endsAtMs);
     } else if (vehicle.auction.status === 'upcoming') {
       const startsAtMs = new Date(vehicle.auction.startsAt).getTime();
-      const now = Date.now();
       const diffMs = startsAtMs - now;
 
       if (diffMs <= 0) {
-        setTimeRemaining('Starting now');
+        return 'Starting now';
       } else {
         const diffSeconds = Math.floor(diffMs / 1000);
         const diffMinutes = Math.floor(diffSeconds / 60);
         const diffHours = Math.floor(diffMinutes / 60);
         const diffDays = Math.floor(diffHours / 24);
 
-        if (diffDays > 0) setTimeRemaining(`Starts in ${diffDays}d ${diffHours % 24}h`);
-        else if (diffHours > 0) setTimeRemaining(`Starts in ${diffHours}h ${diffMinutes % 60}m`);
-        else if (diffMinutes > 0) setTimeRemaining(`Starts in ${diffMinutes}m`);
-        else setTimeRemaining(`Starts in ${diffSeconds}s`);
+        if (diffDays > 0) return `Starts in ${diffDays}d ${diffHours % 24}h`;
+        else if (diffHours > 0) return `Starts in ${diffHours}h ${diffMinutes % 60}m`;
+        else if (diffMinutes > 0) return `Starts in ${diffMinutes}m`;
+        else return `Starts in ${diffSeconds}s`;
       }
     } else {
-      setTimeRemaining('Auction ended');
+      return 'Auction ended';
     }
-  }, [vehicle.auction.status, vehicle.auction.startsAt, vehicle.auction.endsAt, countdownUpdateKey]);
+  }, [vehicle.auction.status, vehicle.auction.startsAt, vehicle.auction.endsAt, now]);
 
   const getConditionGradeColor = (grade: number): 'default' | 'success' | 'warning' | 'error' => {
     if (grade === 5) return 'success';
@@ -141,10 +138,10 @@ export function InventoryPage() {
   const [selectedBodyStyle, setSelectedBodyStyle] = useState(searchParams.get('bodyStyle') || '');
   const [selectedStatus, setSelectedStatus] = useState(searchParams.get('status') || '');
   const [sortBy, setSortBy] = useState<'endingSoon' | 'priceAsc' | 'priceDesc' | 'mileageAsc'>(
-    (searchParams.get('sort') as any) || 'endingSoon'
+    (searchParams.get('sort') as 'endingSoon' | 'priceAsc' | 'priceDesc' | 'mileageAsc' | null) || 'endingSoon'
   );
   const [currentPage, setCurrentPage] = useState(parseInt(searchParams.get('page') || '1', 10));
-  const [countdownUpdate, setCountdownUpdate] = useState(0);
+  const [now, setNow] = useState(0);
   const queryTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -154,8 +151,8 @@ export function InventoryPage() {
   const filters: VehicleFilters = {
     query: query.trim() || undefined,
     make: selectedMake || undefined,
-    bodyStyle: (selectedBodyStyle as any) || undefined,
-    auctionStatus: (selectedStatus as any) || undefined,
+    bodyStyle: (selectedBodyStyle as 'sedan' | 'suv' | 'truck' | 'coupe' | 'van' | '') || undefined,
+    auctionStatus: (selectedStatus as 'live' | 'upcoming' | 'ended' | '') || undefined,
     sort: sortBy,
   };
 
@@ -199,12 +196,15 @@ export function InventoryPage() {
 
   useEffect(() => {
     // Reset to page 1 when other filters change
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCurrentPage(1);
   }, [selectedMake, selectedBodyStyle, selectedStatus, sortBy]);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setNow(Date.now());
     countdownIntervalRef.current = setInterval(() => {
-      setCountdownUpdate((prev) => prev + 1);
+      setNow(Date.now());
     }, 1000);
 
     return () => {
@@ -229,7 +229,7 @@ export function InventoryPage() {
       value = value.slice(0, 100);
     }
 
-    value = value.replace(/[\x00-\x1F\x7F]/g, '');
+    value = value.split('').filter((c) => { const code = c.charCodeAt(0); return code >= 0x20 && code !== 0x7F; }).join('');
 
     setInputValue(value);
   };
@@ -336,7 +336,7 @@ export function InventoryPage() {
 
             <select
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
+              onChange={(e) => setSortBy(e.target.value as 'endingSoon' | 'priceAsc' | 'priceDesc' | 'mileageAsc')}
               className={styles.filterSelect}
               aria-label="Sort by"
             >
@@ -420,7 +420,7 @@ export function InventoryPage() {
 
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as any)}
+            onChange={(e) => setSortBy(e.target.value as 'endingSoon' | 'priceAsc' | 'priceDesc' | 'mileageAsc')}
             className={styles.filterSelect}
             aria-label="Sort by"
           >
@@ -440,7 +440,7 @@ export function InventoryPage() {
 
       <div className={styles.grid}>
         {paginatedVehicles.map((vehicle) => (
-          <VehicleCard key={vehicle.id} vehicle={vehicle} countdownUpdateKey={countdownUpdate} />
+          <VehicleCard key={vehicle.id} vehicle={vehicle} now={now} />
         ))}
       </div>
 
