@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { vehicleService } from '../../api/client';
 import { ErrorState } from '../../components/ErrorState';
@@ -58,7 +58,7 @@ function VehicleCard({ vehicle, countdownUpdateKey }: VehicleCardProps) {
     : vehicle.auction.startingBid;
 
   return (
-    <a href={`/vehicles/${vehicle.id}`} className={styles.vehicleCard}>
+    <Link to={`/vehicles/${vehicle.id}`} className={styles.vehicleCard}>
       <div className={styles.imageWrapper}>
         <img
           src={sanitizeImageUrl(vehicle.photos[0])}
@@ -116,7 +116,7 @@ function VehicleCard({ vehicle, countdownUpdateKey }: VehicleCardProps) {
           )}
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
